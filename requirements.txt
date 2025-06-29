@@ -2,5 +2,3 @@ rootutils
 paho-mqtt
 python-weather
 suntime
-
-
