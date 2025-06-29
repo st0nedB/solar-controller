@@ -1,8 +1,8 @@
 FROM python:3.12-slim
 
 WORKDIR /app
-COPY . .
+COPY . /app
 
 RUN python -m pip install -r /app/requirements.txt
 
-CMD ["python3 main.py"]
+CMD ["python main.py"]

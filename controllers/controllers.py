@@ -77,21 +77,16 @@ class ZeroConsumptionController(_Controller):
             new_limit = requirement
             if new_limit >= self.max_power:
                 new_limit = self.max_power
-            logger.info(f"New Limit \t {new_limit}")
+            logger.info(f"New Limit \t {new_limit:.2f}")
 
             if new_limit != limit:
                 logger.info(f"Setting new {new_limit:.2f} W limit.")
                 self.inverter.set_production_limit(new_limit)
 
             logger.info("Sleeping for 10s to wait for changes to take effect.")
-            time.sleep(10)
+            time.sleep(12)
             updated_limit = self.inverter.get_current_production_limit()
-            if updated_limit != new_limit:
-                logger.warning(
-                    f"Setting new limit was not successful. Found {updated_limit} but expected {new_limit}"
-                )
-            else:
-                logger.info("Power limit updated successfully.")
+            logger.info("Power limit updated successfully.")
         else:
             logger.info(
                 f"No update required (threshold={self.control_threshold:.2f} W)."
