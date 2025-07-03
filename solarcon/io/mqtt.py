@@ -2,10 +2,12 @@ from typing import Optional, Callable, Optional
 from collections import deque
 import paho.mqtt.client as mqtt
 import logging
+from .io import Sensor, Consumer
+
 logger = logging.getLogger(__name__)
 
 
-class MQTT:
+class Mqtt:
     def __init__(
         self,
         broker: str,
@@ -23,7 +25,7 @@ class MQTT:
 
     def connect(self):
         self.client.connect(self.broker, self.port)
-        self.client.loop_start() 
+        self.client.loop_start()
 
     def disconnect(self):
         self.client.disconnect()
@@ -32,19 +34,19 @@ class MQTT:
         if topic not in self.subscriptions:
             self.subscriptions[topic] = []
             self.client.subscribe(topic)
-        
+
         self.subscriptions[topic].append(callback)
-        
+
     def _on_message(self, client, userdata, message):
         topic = message.topic
         payload = message.payload.decode()
         for cb in self.subscriptions.get(topic, []):
-            cb(payload)        
+            cb(payload)
 
 
-class Reader:
+class MqttSensor(Sensor):
     def __init__(
-        self, mqtt_instance: MQTT, topic: str, filter: Optional[Callable] = None
+        self, mqtt_instance: Mqtt, topic: str, filter: Optional[Callable] = None
     ):
         self.topic = topic
         self.filter = filter
@@ -54,18 +56,18 @@ class Reader:
     def _on_message(self, payload: str):
         self.messages.append(payload)
 
-    def get_message(self):
+    def get(self):
         if not self.messages:
             return None
-        
+
         message = self.messages[-1]
-        return self.filter(message) if self.filter else message    
+        return self.filter(message) if self.filter else message
 
 
-class Writer:
-    def __init__(self, mqtt_instance: MQTT, topic: str):
+class MqttConsumer(Consumer):
+    def __init__(self, mqtt_instance: Mqtt, topic: str):
         self.mqtt = mqtt_instance
         self.topic = topic
 
-    def publish(self, payload: str):
-        self.mqtt.client.publish(self.topic, payload)
+    def set(self, value: str):
+        self.mqtt.client.publish(self.topic, value)

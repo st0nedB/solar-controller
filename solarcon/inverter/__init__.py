@@ -1,0 +1,1 @@
+from solarcon.inverter.inverter import Inverter, DeyeSunM160G4
